@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب تطبيق معدل | الخدمة الذكية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2aabee; /* لون تيليجرام */
+            --primary-dark: #229ed9;
+            --primary-light: #42b8f5;
+            --accent-color: #8774e1; /* لون بديل للتمييز */
+            --text-primary: #ffffff;
+            --text-secondary: #adbac7;
+            --bg-color: #17212b; /* خلفية داكنة مثل تيليجرام */
+            --card-color: #1f2936; /* لون البطاقة الداكن */
+            --msg-out-bg: #2b5278; /* لون فقاعة رسائل المستخدم */
+            --msg-in-bg: #182533; /* لون فقاعة رسائل البوت */
+            --error-color: #e74c3c; /* لون الخطأ */
+            --success-color: #2ecc71; /* لون النجاح */
+            --border-radius: 8px;
+            --shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            padding: 0;
+        }
+
+        .chat-container {
+            flex: 1;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
+        }
+
+        .chat-header {
+            background-color: var(--card-color);
+            color: var(--text-primary);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .message-count-badge {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .header-info h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .header-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 10px 15px;
+            overflow-y: auto;
+            background-color: var(--bg-color);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath fill='%23212e3b' fill-opacity='0.15' d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z'%3E%3C/path%3E%3C/svg%3E");
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+            max-width: 75%;
+            animation: message-appear 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+            position: relative;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+            margin-left: auto;
+        }
+
+        .system-message {
+            align-self: center;
+            max-width: 85%;
+            margin: 10px 0;
+        }
+
+        .system-content {
+            background-color: rgba(50, 50, 50, 0.5);
+            color: var(--text-secondary);
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .message-content {
+            padding: 10px 12px;
+            border-radius: var(--border-radius);
+            position: relative;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .bot-content {
+            background-color: var(--msg-in-bg);
+            border-top-left-radius: 0;
+        }
+
+        .user-content {
+            background-color: var(--msg-out-bg);
+            color: var(--text-primary);
+            border-top-right-radius: 0;
+        }
+
+        .error-content {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #ff9b9b;
+        }
+
+        .bot-content:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -8px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid var(--msg-in-bg);
+            border-left: 8px solid transparent;
+        }
+
+        .user-content:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -8px;
+            width: 0;
+            height: 0;
+            border-top: 8px solid var(--msg-out-bg);
+            border-right: 8px solid transparent;
+        }
+        
+        .message-text {
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            margin-top: 4px;
+            text-align: left;
+            opacity: 0.7;
+        }
+
+        .chat-input-container {
+            padding: 12px 15px;
+            background-color: var(--card-color);
+            display: flex;
+            align-items: center;
+            position: relative;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .char-counter {
+            position: absolute;
+            left: 20px;
+            top: -18px;
+            background-color: var(--card-color);
+            border-radius: 10px 10px 0 0;
+            padding: 3px 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .char-counter.limit-close {
+            color: #f39c12;
+        }
+
+        .char-counter.limit-reached {
+            color: var(--error-color);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            flex: 1;
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            padding: 0 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 10px 5px;
+            font-size: 15px;
+            outline: none;
+            color: var(--text-primary);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .send-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .typing-indicator {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background-color: var(--msg-in-bg);
+            border-radius: var(--border-radius);
+            width: fit-content;
+            margin-bottom: 8px;
+            align-self: flex-start;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: typing-dot 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing-dot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes message-appear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scrollbar customization */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .message {
+                max-width: 85%;
+            }
+            
+            .header-info h2 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="header-left">
+                    <div class="avatar">
+                        <img src="https://i.postimg.cc/SRhrWKRH/IMG-20250403-155725-453.jpg" alt="Avatar">
+                    </div>
+                    <div class="header-info">
+                        <h2>Mod-Apk <span class="status-indicator"></span></h2>
+                        <p>متصل الآن</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="message-count-badge" id="message-count-badge">0/2</div>
+                </div>
+            </div>
+            
+            <div id="chat-messages" class="chat-messages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        class="chat-input" 
+                        placeholder="اكتب اسم التطبيق الذي تريده..." 
+                        autocomplete="off"
+                        maxlength="60"
+                    >
+                </div>
+                <button id="send-btn" class="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <div id="char-counter" class="char-counter">0/60</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const botToken = '8107941061:AAHD9VYiA8zNXgCt132OzYb34RMDkRpvMTo';
+        const chatId = '5699033867';
+
+        // استخدام localStorage لتخزين عدد الرسائل ومعلومات اليوم
+        let messageCount = 0;
+        let messageDate = '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMessagesData();
+            updateMessageCountBadge();
+            
+            setTimeout(() => {
+                showWelcomeMessage();
+            }, 500);
+            
+            // إضافة مستمعات الأحداث
+            document.getElementById('send-btn').addEventListener('click', sendMessage);
+            document.getElementById('user-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // تحديث عداد الأحرف عند الكتابة
+            const userInput = document.getElementById('user-input');
+            const charCounter = document.getElementById('char-counter');
+            
+            userInput.addEventListener('input', function() {
+                const length = this.value.length;
+                charCounter.textContent = `${length}/60`;
+                
+                if (length >= 50 && length < 60) {
+                    charCounter.className = 'char-counter limit-close';
+                } else if (length >= 60) {
+                    charCounter.className = 'char-counter limit-reached';
+                } else {
+                    charCounter.className = 'char-counter';
+                }
+            });
+        });
+
+        // تحميل معلومات الرسائل من localStorage
+        function loadMessagesData() {
+            const today = new Date().toDateString();
+            const storedDate = localStorage.getItem('messageDate');
+            const storedCount = localStorage.getItem('messageCount');
+            
+            if (storedDate === today && storedCount) {
+                messageCount = parseInt(storedCount);
+                messageDate = storedDate;
+            } else {
+                // يوم جديد، إعادة ضبط العداد
+                messageCount = 0;
+                messageDate = today;
+                localStorage.setItem('messageDate', today);
+                localStorage.setItem('messageCount', '0');
+            }
+        }
+
+        // تحديث عداد الرسائل في الشاشة
+        function updateMessageCountBadge() {
+            const badge = document.getElementById('message-count-badge');
+            badge.textContent = `${messageCount}/2`;
+            
+            if (messageCount >= 2) {
+                badge.style.backgroundColor = 'var(--error-color)';
+                document.getElementById('send-btn').disabled = true;
+            } else {
+                badge.style.backgroundColor = 'var(--primary-color)';
+                document.getElementById('send-btn').disabled = false;
+            }
+        }
+
+        function showWelcomeMessage() {
+            const welcomeMessage = "يرجى إدخال اسم التطبيق الذي ترغب في الحصول على نسخة مهكرة له ";
+            addBotMessage(welcomeMessage);
+            
+            // أضف رسالة نظام لتوضيح الحد الأقصى
+            addSystemMessage("يمكنك إرسال رسالتين فقط في اليوم");
+        }
+
+        function addBotMessage(message, isError = false) {
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                removeTypingIndicator();
+                
+                const chatMessages = document.getElementById("chat-messages");
+                const messageElement = document.createElement("div");
+                messageElement.className = "message bot-message";
+                
+                const now = new Date();
+                const timeString = now.getHours() + ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes();
+                
+                const contentClass = isError ? "message-content bot-content error-content" : "message-content bot-content";
+                
+                messageElement.innerHTML = `
+                    <div class="${contentClass}">
+                        <div class="message-text">${message}</div>
+                        <div class="message-time">${timeString}</div>
+                    </div>
+                `;
+                
+                messageElement.style.animationDelay = '0.3s';
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+
+        function addSystemMessage(message) {
+            const chatMessages = document.getElementById("chat-messages");
+            const messageElement = document.createElement("div");
+            messageElement.className = "message system-message";
+            
+            messageElement.innerHTML = `
+                <div class="system-content">
+                    <div class="message-text">${message}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById("chat-messages");
+            const indicatorElement = document.createElement("div");
+            indicatorElement.className = "typing-indicator";
+            indicatorElement.id = "typing-indicator";
+            
+            indicatorElement.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            
+            chatMessages.appendChild(indicatorElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById("typing-indicator");
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function addUserMessage(message) {
+            const chatMessages = document.getElementById("chat-messages");
+            const messageElement = document.createElement("div");
+            messageElement.className = "message user-message";
+            
+            const now = new Date();
+            const timeString = now.getHours() + ":" + (now.getMinutes() < 10 ? "0" : "") + now.getMinutes();
+            
+            messageElement.innerHTML = `
+                <div class="message-content user-content">
+                    <div class="message-text">${message}</div>
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            document.getElementById("user-input").value = "";
+            document.getElementById("char-counter").textContent = "0/60";
+            document.getElementById("char-counter").className = "char-counter";
+        }
+        
+        function sendMessage() {
+            const userInput = document.getElementById("user-input").value.trim();
+            if (userInput === "") return;
+            
+            // تحقق من عدد الرسائل المرسلة
+            const today = new Date().toDateString();
+            if (messageDate !== today) {
+                messageCount = 0; // إعادة ضبط العدد إذا كان تاريخ اليوم قد تغير
+                messageDate = today;
+                localStorage.setItem('messageDate', today);
+                localStorage.setItem('messageCount', '0');
+            }
+            
+            if (messageCount >= 2) {
+                addBotMessage("لقد قمت بإرسال الحد الأقصى من الرسائل اليوم. يرجى العودة غدًا.", true);
+                return;
+            }
+
+            if (userInput.length > 60) {
+                addBotMessage("تجاوزت الحد الأقصى للطول المسموح به، يجب أن تكون الرسالة 60 حرفًا أو أقل.", true);
+                return;
+            }
+            
+            addUserMessage(userInput);
+            messageCount++;
+            
+            // تحديث localStorage
+            localStorage.setItem('messageCount', messageCount.toString());
+            updateMessageCountBadge();
+
+            const botResponse = "شكرًا، تم استلام طلبك وسنقوم بنشر التطبيق على القناة في أقرب وقت.";
+            addBotMessage(botResponse);
+            
+            // إضافة رسالة نظام توضح عدد الرسائل المتبقية
+            if (messageCount >= 2) {
+                addSystemMessage("لقد استخدمت الحد الأقصى من الرسائل اليوم. يرجى العودة غدًا.");
+            } else {
+                addSystemMessage(`تبقى لديك ${2 - messageCount} رسالة اليوم.`);
+            }
+            
+            const telegramMessage = `طلب جديد: ${userInput}`;
+            sendToTelegram(telegramMessage);
+        }
+
+        async function sendToTelegram(message) {
+            try {
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'HTML',
+                    }),
+                });
+            } catch (error) {
+                console.error("خطأ في إرسال الرسالة إلى تيليجرام:", error);
+            }
+        }
+    </script>
+</body>
+</html>
